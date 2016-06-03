@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
+    <title>孙悟空</title>
+   <style type="text/css">
+    body {
+  background-color: #000;
+}
+article{ display: block;
+  width:610px;
+  margin: 0 auto;
+  margin: calc(50vh - 125px) auto 0;}
+canvas {
+  background-color: #000;
+  border:1px solid #222;
+}
+   </style>
+</head>
+<body> 
+<article>
+<canvas id="canvas"></canvas>
+<canvas id="_canvas"></canvas>
+</article>
+    <script>
+    var c = document.getElementById("canvas");
+var ctx = c.getContext("2d");
+
+var _c = document.getElementById("_canvas");
+var _ctx = _c.getContext("2d");
+var cw = c.width = _c.width = 300,
+  cx = cw / 2;
+var ch = c.height = _c.height = 300,
+  cy = ch / 2;
+var frames = 0;
+var rad = Math.PI / 180;
+var R = 100;
+var threshold = 160;
+
+ctx.beginPath();
+ctx.arc(cx,cy,R,0,2*Math.PI);
+ctx.stroke();
+
+var dots = [];
+
+function Dot(a){
+  this.a = a;
+  this.rand = Math.random()*360; 
+  this.R = R + (R/5) * Math.sin(this.rand*rad);
+  this.r = randomIntFromInterval(15, 45);
+  this.x = cx + this.R*Math.cos(this.a*rad);
+  this.y = cy + this.R*Math.sin(this.a*rad);
+}
+Dot.prototype.draw = function(){
+  ctx.beginPath();
+  ctx.arc(this.x,this.y,this.r,0,2*Math.PI);
+  ctx.fillStyle = Grd(this.a,this.x, this.y, this.r);
+  ctx.fill();
+}
+
+for(var i = 0; i < 360; i+=10){
+  var dot = new Dot(i);
+  dots.push(dot);
+}
+
+
+function Animacion() {
+  elId = window.requestAnimationFrame(Animacion);
+  frames++;
+  ctx.clearRect(0, 0, cw, ch);
+  for( var i = 0; i < dots.length; i++){
+    dots[i].a+=.1; 
+    dots[i].R = R + (R/5) * Math.sin((dots[i].rand + frames)*rad);
+    dots[i].x = cx + dots[i].R*Math.cos(dots[i].a*rad);
+    dots[i].y = cy + dots[i].R*Math.sin(dots[i].a*rad);
+    dots[i].draw();
+  }
+  
+    /////////////////////////////
+  var imgData = ctx.getImageData(0, 0, cw, ch);
+  var pixels = imgData.data;
+
+  for (var i = 3; i < pixels.length; i += 4) {
+    if (pixels[i] < threshold)
+      pixels[i] = 0;
+  }
+  _ctx.putImageData(imgData, 0, 0)
+ 
+}
+elId = window.requestAnimationFrame(Animacion);
+
+
+// UTILIDADES
+
+function rnd() {// a @tmrDevelops function
+  Math.seed = (Math.seed * 108013 + 2531011) & 0xffffffff;
+  return Math.abs(Math.seed >> 16) / 32869;
+}
+function randomIntFromInterval(mn, mx) {
+  return ~~(rnd() * (mx - mn + 1) + mn);
+}
+
+
+function Grd(hue,x, y, r) {
+  grd = ctx.createRadialGradient(x, y, 0, x, y, r);
+  grd.addColorStop(0, 'hsla('+hue+',100%,75%,1)');
+  grd.addColorStop(1, 'hsla('+hue+',50%,15%,0)');
+  return grd;
+}
+    </script>
+</body>
+</html>
